@@ -29,6 +29,9 @@ import (
 	"github.com/xwb1989/sqlparser/dependency/sqltypes"
 )
 
+// symbol format sql use value or placeholder
+var ValueUsePlaceHolder bool
+
 // Instructions for creating new types: If a type
 // needs to satisfy an interface, declare that function
 // along with that interface. This will help users
@@ -2313,14 +2316,34 @@ func NewValArg(in []byte) *SQLVal {
 func (node *SQLVal) Format(buf *TrackedBuffer) {
 	switch node.Type {
 	case StrVal:
+		if ValueUsePlaceHolder {
+			buf.WriteArg("?")
+			break
+		}
 		sqltypes.MakeTrusted(sqltypes.VarBinary, node.Val).EncodeSQL(buf)
 	case IntVal, FloatVal, HexNum:
+		if ValueUsePlaceHolder {
+			buf.WriteArg("?")
+			break
+		}
 		buf.Myprintf("%s", []byte(node.Val))
 	case HexVal:
+		if ValueUsePlaceHolder {
+			buf.WriteArg("?")
+			break
+		}
 		buf.Myprintf("X'%s'", []byte(node.Val))
 	case BitVal:
+		if ValueUsePlaceHolder {
+			buf.WriteArg("?")
+			break
+		}
 		buf.Myprintf("B'%s'", []byte(node.Val))
 	case ValArg:
+		if ValueUsePlaceHolder {
+			buf.WriteArg("?")
+			break
+		}
 		buf.WriteArg(string(node.Val))
 	default:
 		panic("unexpected")
